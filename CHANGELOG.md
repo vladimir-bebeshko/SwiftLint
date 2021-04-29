@@ -27,6 +27,10 @@
   [Marcelo Fabri](https://github.com/marcelofabri)
   [#3562](https://github.com/realm/SwiftLint/issues/3562)
 
+* Fix `unused_capture_list`, `empty_enum_arguments` and `implicit_return` rules
+  when using Swift 5.4.  
+  [Marcelo Fabri](https://github.com/marcelofabri)
+
 ## 0.43.1: Laundroformat
 
 #### Breaking
