@@ -1,4 +1,5 @@
 import Foundation
+import PerfectPCRE2
 import SourceKittenFramework
 
 internal func regex(_ pattern: String,
@@ -113,10 +114,38 @@ extension SwiftLintFile {
         }
     }
 
+    internal func matchesAndTokens(
+        matchingPcre pattern: String,
+        range: NSRange? = nil
+    ) -> [([NSRange], [SwiftLintSyntaxToken])] {
+        let contents = stringView
+        let range = range ?? contents.range
+        let syntax = syntaxMap
+        do {
+            return try contents.string.pcre2Match(pattern: pattern).compactMap { matchGroups in
+                let ranges = matchGroups.map { contents.nsString.range(of: $0, range: range) }
+                let matchByteRange = contents.NSRangeToByteRange(start: ranges[0].location, length: ranges[0].length)
+                return matchByteRange.map { (ranges, syntax.tokens(inByteRange: $0)) }
+            }
+        } catch {
+            print("Error parsing with pcre: \(error)")
+            return []
+        }
+    }
+
     internal func matchesAndSyntaxKinds(matching pattern: String,
                                         range: NSRange? = nil) -> [(NSTextCheckingResult, [SyntaxKind])] {
         return matchesAndTokens(matching: pattern, range: range).map { textCheckingResult, tokens in
             (textCheckingResult, tokens.kinds)
+        }
+    }
+
+    internal func matchesAndSyntaxKinds(
+        matchingPcre pattern: String,
+        range: NSRange? = nil
+    ) -> [([NSRange], [SyntaxKind])] {
+        matchesAndTokens(matchingPcre: pattern, range: range).map { ranges, tokens in
+            (ranges, tokens.kinds)
         }
     }
 
@@ -128,6 +157,16 @@ extension SwiftLintFile {
     internal func match(pattern: String, range: NSRange? = nil, captureGroup: Int = 0) -> [(NSRange, [SyntaxKind])] {
         return matchesAndSyntaxKinds(matching: pattern, range: range).map { textCheckingResult, syntaxKinds in
             (textCheckingResult.range(at: captureGroup), syntaxKinds)
+        }
+    }
+
+    internal func match(
+        pcrePattern: String,
+        range: NSRange? = nil,
+        captureGroup: Int = 0
+    ) -> [(NSRange, [SyntaxKind])] {
+        matchesAndSyntaxKinds(matchingPcre: pcrePattern, range: range).map { ranges, syntaxKinds in
+            (ranges[captureGroup], syntaxKinds)
         }
     }
 
@@ -209,6 +248,21 @@ extension SwiftLintFile {
         return match(pattern: pattern, range: range, captureGroup: captureGroup)
             .filter { syntaxKinds.isDisjoint(with: $0.1) }
             .map { $0.0 }
+    }
+
+    internal func match(
+        pcrePattern: String,
+        excludingSyntaxKinds syntaxKinds: Set<SyntaxKind>,
+        range: NSRange? = nil,
+        captureGroup: Int = 0
+    ) -> [NSRange] {
+        match(pcrePattern: pcrePattern, range: range, captureGroup: captureGroup)
+            .filter {
+                syntaxKinds.isDisjoint(with: $0.1)
+            }
+            .map {
+                $0.0
+            }
     }
 
     internal typealias MatchMapping = (NSTextCheckingResult) -> NSRange

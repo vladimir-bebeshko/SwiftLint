@@ -13,10 +13,10 @@ class CustomRulesTests: XCTestCase {
                 "severity": "error"
             ]
         ]
-        var comp = RegexConfiguration(identifier: "my_custom_rule")
+        var comp = RegexConfiguration(identifier: "my_custom_rule", isPCRE: true)
         comp.name = "MyCustomRule"
         comp.message = "Message"
-        comp.regex = regex("regex")
+        comp.pcrePattern = "regex"
         comp.severityConfiguration = SeverityConfiguration(.error)
         comp.excludedMatchKinds = SyntaxKind.allKinds.subtracting([.comment])
         var compRules = CustomRulesConfiguration()
@@ -40,10 +40,10 @@ class CustomRulesTests: XCTestCase {
                 "severity": "error"
             ]
         ]
-        var comp = RegexConfiguration(identifier: "my_custom_rule")
+        var comp = RegexConfiguration(identifier: "my_custom_rule", isPCRE: true)
         comp.name = "MyCustomRule"
         comp.message = "Message"
-        comp.regex = regex("regex")
+        comp.pcrePattern = "regex"
         comp.severityConfiguration = SeverityConfiguration(.error)
         comp.excludedMatchKinds = Set<SyntaxKind>([.comment])
         var compRules = CustomRulesConfiguration()

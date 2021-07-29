@@ -26,7 +26,7 @@ public struct CustomRulesConfiguration: RuleConfiguration, Equatable, CacheDescr
         }
 
         for (key, value) in configurationDict {
-            var ruleConfiguration = RegexConfiguration(identifier: key)
+            var ruleConfiguration = RegexConfiguration(identifier: key, isPCRE: true)
 
             do {
                 try ruleConfiguration.apply(configuration: value)
@@ -86,21 +86,29 @@ public struct CustomRules: Rule, ConfigurationProviderRule, CacheDescriptionProv
         }
 
         return configurations.flatMap { configuration -> [StyleViolation] in
-            let pattern = configuration.regex.pattern
+            let pattern = configuration.pcrePattern ?? configuration.regex.pattern
             let captureGroup = configuration.captureGroup
             let excludingKinds = configuration.excludedMatchKinds
-            return file.match(pattern: pattern, excludingSyntaxKinds: excludingKinds, captureGroup: captureGroup).map({
-                StyleViolation(ruleDescription: configuration.description,
-                               severity: configuration.severity,
-                               location: Location(file: file, characterOffset: $0.location),
-                               reason: configuration.message)
-            }).filter { violation in
-                guard let region = file.regions().first(where: { $0.contains(violation.location) }) else {
-                    return true
+            return file.match(
+                pcrePattern: pattern,
+                excludingSyntaxKinds: excludingKinds,
+                captureGroup: captureGroup
+            )
+                .map {
+                    StyleViolation(
+                        ruleDescription: configuration.description,
+                        severity: configuration.severity,
+                        location: Location(file: file, characterOffset: $0.location),
+                        reason: configuration.message
+                    )
                 }
+                .filter { violation in
+                    guard let region = file.regions().first(where: { $0.contains(violation.location) }) else {
+                        return true
+                    }
 
-                return !region.isRuleDisabled(customRuleIdentifier: configuration.identifier)
-            }
+                    return !region.isRuleDisabled(customRuleIdentifier: configuration.identifier)
+                }
         }
     }
 }

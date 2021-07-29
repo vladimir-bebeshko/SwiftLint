@@ -1,5 +1,4 @@
 import Foundation
-import PerfectPCRE2
 import SourceKittenFramework
 
 public struct RegexConfiguration: RuleConfiguration, Hashable, CacheDescriptionProvider {
@@ -7,6 +6,8 @@ public struct RegexConfiguration: RuleConfiguration, Hashable, CacheDescriptionP
     public var name: String?
     public var message = "Regex matched."
     public var regex: NSRegularExpression!
+    private let _isPCRE: Bool
+    public var pcrePattern: String?
     public var included: NSRegularExpression?
     public var excluded: NSRegularExpression?
     public var excludedMatchKinds = Set<SyntaxKind>()
@@ -18,7 +19,7 @@ public struct RegexConfiguration: RuleConfiguration, Hashable, CacheDescriptionP
     }
 
     public var consoleDescription: String {
-        return "\(severity.rawValue): \(regex.pattern)"
+        return "\(severity.rawValue): \(pcrePattern ?? regex.pattern)"
     }
 
     internal var cacheDescription: String {
@@ -26,7 +27,7 @@ public struct RegexConfiguration: RuleConfiguration, Hashable, CacheDescriptionP
             identifier,
             name ?? "",
             message,
-            regex.pattern,
+            pcrePattern ?? regex.pattern,
             included?.pattern ?? "",
             excluded?.pattern ?? "",
             SyntaxKind.allKinds.subtracting(excludedMatchKinds)
@@ -45,8 +46,9 @@ public struct RegexConfiguration: RuleConfiguration, Hashable, CacheDescriptionP
                                description: "", kind: .style)
     }
 
-    public init(identifier: String) {
+    public init(identifier: String, isPCRE: Bool = false) {
         self.identifier = identifier
+        _isPCRE = isPCRE
     }
 
     public mutating func apply(configuration: Any) throws {
@@ -55,7 +57,11 @@ public struct RegexConfiguration: RuleConfiguration, Hashable, CacheDescriptionP
                 throw ConfigurationError.unknownConfiguration
         }
 
-        regex = try .cached(pattern: regexString)
+        if _isPCRE {
+            pcrePattern = regexString
+        } else {
+            regex = try .cached(pattern: regexString)
+        }
 
         if let includedString = configurationDict["included"] as? String {
             included = try .cached(pattern: includedString)
@@ -75,7 +81,7 @@ public struct RegexConfiguration: RuleConfiguration, Hashable, CacheDescriptionP
             try severityConfiguration.apply(configuration: severityString)
         }
         if let captureGroup = configurationDict["capture_group"] as? Int {
-            guard (0 ... regex.numberOfCaptureGroups).contains(captureGroup) else {
+            guard pcrePattern != nil || (0 ... regex.numberOfCaptureGroups).contains(captureGroup) else {
                 throw ConfigurationError.unknownConfiguration
             }
             self.captureGroup = captureGroup
