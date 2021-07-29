@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "PerfectPCRE2",
+        "repositoryURL": "https://github.com/MrTheSaw/Perfect-PCRE2.git",
+        "state": {
+          "branch": null,
+          "revision": "5c04d84b93dafe52393910dd79352f8e7860f367",
+          "version": "3.1.0"
+        }
+      },
+      {
         "package": "SourceKitten",
         "repositoryURL": "https://github.com/jpsim/SourceKitten.git",
         "state": {

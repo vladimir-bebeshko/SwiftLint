@@ -1,4 +1,5 @@
 import Foundation
+import PerfectPCRE2
 import SourceKittenFramework
 
 public struct RegexConfiguration: RuleConfiguration, Hashable, CacheDescriptionProvider {

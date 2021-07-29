@@ -19,6 +19,7 @@ let package = Package(
         .package(url: "https://github.com/jpsim/SourceKitten.git", .upToNextMinor(from: "0.31.0")),
         .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.2"),
         .package(url: "https://github.com/scottrhoyt/SwiftyTextTable.git", from: "0.9.0"),
+        .package(name: "PerfectPCRE2", url: "https://github.com/MrTheSaw/Perfect-PCRE2.git", from: "3.1.0"),
     ] + (addCryptoSwift ? [.package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMinor(from: "1.3.2"))] : []),
     targets: [
         .target(
@@ -27,6 +28,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "SwiftLintFramework",
                 "SwiftyTextTable",
+                "PerfectPCRE2",
             ]
         ),
         .target(
@@ -34,6 +36,7 @@ let package = Package(
             dependencies: [
                 .product(name: "SourceKittenFramework", package: "SourceKitten"),
                 "Yams",
+                "PerfectPCRE2",
             ] + (addCryptoSwift ? ["CryptoSwift"] : [])
         ),
         .testTarget(
