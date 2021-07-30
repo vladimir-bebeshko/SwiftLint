@@ -1,4 +1,26 @@
-## Master
+## 0.44.0: Fork: PCRE2 for Custom Rules
+
+#### Breaking
+
+* SwiftLint now has extra dependencies:
+  * `pcre2` keg from [Brewfile](https://docs.brew.sh/Manpage#bundle-subcommand)
+  * `PerfectPRCE2` [library](https://github.com/MrTheSaw/Perfect-PCRE2.git)
+
+#### Experimental
+
+* PCRE2 for Custom Rules
+
+#### Enhancements
+
+* [PCRE](http://www.pcre.org) is more capable and more standard than
+  [ICU](https://en.wikipedia.org/wiki/International_Components_for_Unicode)
+
+#### Bug Fixes
+
+* None.
+
+
+## Origin/Master
 
 #### Breaking
 
