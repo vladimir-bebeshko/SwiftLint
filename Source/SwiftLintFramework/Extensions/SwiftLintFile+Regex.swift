@@ -119,16 +119,38 @@ extension SwiftLintFile {
         range: NSRange? = nil
     ) -> [([NSRange], [SwiftLintSyntaxToken])] {
         let contents = stringView
+        let string = contents.string
         let range = range ?? contents.range
         let syntax = syntaxMap
         do {
-            return try contents.string.pcre2Match(pattern: pattern).compactMap { matchGroups in
-                let ranges = matchGroups.map { contents.nsString.range(of: $0, range: range) }
-                let matchByteRange = contents.NSRangeToByteRange(start: ranges[0].location, length: ranges[0].length)
-                return matchByteRange.map { (ranges, syntax.tokens(inByteRange: $0)) }
-            }
+            return try PCRE2(
+                pattern: pattern,
+                options: [.noUTFCheck]
+            )
+                .match(
+                    string,
+                    options: [.noUTFCheck]
+                )
+                .map {
+                    $0.compactMap { (range: Range<String.Index>) -> String? in
+                        guard range.clamped(to: string.startIndex ..< string.endIndex) == range else {
+                            return nil
+                        }
+                        return String(string[range])
+                    }
+                }
+                .compactMap { matchGroups in
+                    let ranges = matchGroups.map { contents.nsString.range(of: $0, range: range) }
+                    let matchByteRange = contents.NSRangeToByteRange(
+                        start: ranges[0].location,
+                        length: ranges[0].length
+                    )
+                    return matchByteRange.map {
+                        (ranges, syntax.tokens(inByteRange: $0))
+                    }
+                }
         } catch {
-            print("Error parsing with pcre: \(error)")
+            print("Error parsing file '\(path ?? "<nil>")' with pattern '\(pattern)': \(error)")
             return []
         }
     }
