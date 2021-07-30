@@ -1,3 +1,9 @@
+# Fork Note
+
+This repo is a fork of the original [realm/SwiftLint](https://github.com/realm/SwiftLint), using [PCRE](http://www.pcre.org) instead of [ICU](https://en.wikipedia.org/wiki/International_Components_for_Unicode) for [custom rules matching](#defining-custom-rules).
+
+For more details about different regex engines see [Comparison of regular-expression engines](https://en.wikipedia.org/wiki/Comparison_of_regular-expression_engines)
+
 # SwiftLint
 
 A tool to enforce Swift style and conventions, loosely based on the now archived [GitHub Swift Style Guide](https://github.com/github/swift-style-guide). SwiftLint enforces the style guide rules that are generally accepted by the Swift community. These rules are well described in popular style guides like [Ray Wenderlich's Swift Style Guide](https://github.com/raywenderlich/swift-style-guide).
@@ -404,6 +410,8 @@ custom_rules:
     regex: "([nN]inja)"
     match_kinds: string
 ```
+
+This forked repo uses [PCRE2](http://www.pcre.org) for `regex`, but still uses standard Foundation `NSRegularExpression` ([ICU](https://en.wikipedia.org/wiki/International_Components_for_Unicode)) for `included` and `excluded`.
 
 This is what the output would look like:
 
